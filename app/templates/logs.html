@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs - SocialMetrics AI</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+<header>
+    <h1>SocialMetrics AI</h1>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('history') }}">History</a></li>
+            <li><a href="{{ url_for('view_logs') }}" class="active">Logs</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <section class="logs-header">
+        <h2>System Logs</h2>
+        <p>Recent application activity logs</p>
+    </section>
+
+    <section class="logs-container">
+        {% if logs %}
+        <pre class="logs">{{ logs|join('') }}</pre>
+        {% else %}
+        <p class="no-data">No logs available.</p>
+        {% endif %}
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2025 SocialMetrics AI</p>
+</footer>
+</body>
+</html>

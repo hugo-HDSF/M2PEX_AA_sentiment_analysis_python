@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialMetrics AI - Sentiment Analysis</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+<header>
+    <h1>SocialMetrics AI</h1>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}" class="active">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('history') }}">History</a></li>
+            <li><a href="{{ url_for('view_logs') }}">Logs</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <section class="hero">
+        <h2>Twitter Sentiment Analysis</h2>
+        <p>Analyze the sentiment of tweets to understand public opinion</p>
+    </section>
+
+    <section class="analyzer">
+        <h3>Analyze Tweets</h3>
+        <div class="input-container">
+            <textarea id="tweetInput"
+                      placeholder="Enter tweets, one per line"></textarea>
+            <button id="analyzeBtn">Analyze</button>
+        </div>
+
+        <div id="results" class="hidden">
+            <h3>Results</h3>
+            <div id="resultsList"></div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2025 SocialMetrics AI</p>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

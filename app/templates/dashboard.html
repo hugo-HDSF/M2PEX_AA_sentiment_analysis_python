@@ -1,0 +1,187 @@
+html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SocialMetrics AI</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+<header>
+    <h1>SocialMetrics AI</h1>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}"
+                   class="active">Dashboard</a></li>
+            <li><a href="{{ url_for('history') }}">History</a></li>
+            <li><a href="{{ url_for('view_logs') }}">Logs</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <section class="dashboard-header">
+        <h2>Model Performance Dashboard</h2>
+    </section>
+
+    <!-- Replace the metrics display section with this: -->
+    <section class="metrics-grid">
+        <div class="metrics-card">
+            <h3>Sentiment Classification Model</h3>
+            {% if metrics and 'sentiment' in metrics %}
+            <div class="metrics">
+                <div class="metric">
+                    <span class="label">Precision:</span>
+                    <span class="value">{{ "%.2f"|format(metrics.sentiment.precision) }}</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Recall:</span>
+                    <span class="value">{{ "%.2f"|format(metrics.sentiment.recall) }}</span>
+                </div>
+                <div class="metric">
+                    <span class="label">F1 Score:</span>
+                    <span class="value">{{ "%.2f"|format(metrics.sentiment.f1) }}</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Accuracy:</span>
+                    <span class="value">{{ "%.2f"|format(metrics.sentiment.accuracy) }}</span>
+                </div>
+            </div>
+            <div class="confusion-matrix">
+                <h4>Confusion Matrix</h4>
+                <img src="{{ url_for('static', filename='confusion_matrix.png') }}"
+                     alt="Sentiment Confusion Matrix">
+            </div>
+            {% else %}
+            <p class="no-data">No metrics available yet. Train the model
+                first.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="model-info">
+        <h3>Model Information</h3>
+        {% if metrics and 'last_trained' in metrics %}
+        <p>Last trained: {{ metrics.last_trained }}</p>
+        {% else %}
+        <p>Model has not been trained yet.</p>
+        {% endif %}
+        <button id="retrainBtn">Retrain Model Now</button>
+        <div id="retrainStatus" class="hidden"></div>
+    </section>
+
+    <section class="model-init">
+        <h3>System Initialization</h3>
+        <p>If this is your first time using the system, initialize the database
+            with sample tweets and train the initial model:</p>
+        <button id="initBtn" class="init-btn">Initialize System</button>
+        <div id="initStatus" class="hidden"></div>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2025 SocialMetrics AI</p>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const initBtn = document.getElementById('initBtn');
+    if (initBtn) {
+      initBtn.addEventListener('click', async () => {
+        const statusDiv = document.getElementById('initStatus');
+
+        try {
+          // Show loading state
+          initBtn.disabled = true;
+          initBtn.innerText = 'Initializing...';
+          statusDiv.innerText = 'Initializing database and training model, please wait...';
+          statusDiv.className = 'status-info';
+          statusDiv.classList.remove('hidden');
+
+          // Call init endpoint
+          const response = await fetch('/api/init', {
+            method: 'POST',
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            statusDiv.innerText = 'System successfully initialized! Refreshing page...';
+            statusDiv.className = 'status-success';
+
+            // Reload page after a short delay to show updated metrics
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          } else {
+            statusDiv.innerText = `Error: ${result.message || 'Unknown error'}`;
+            statusDiv.className = 'status-error';
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          statusDiv.innerText = 'An error occurred during initialization.';
+          statusDiv.className = 'status-error';
+        } finally {
+          // Reset button state after a delay or on error
+          setTimeout(() => {
+            initBtn.disabled = false;
+            initBtn.innerText = 'Initialize System';
+          }, 2000);
+        }
+      });
+    }
+
+    // Retrain Model button handling - Added here to fix the issue
+    const retrainBtn = document.getElementById('retrainBtn');
+    if (retrainBtn) {
+      retrainBtn.addEventListener('click', async () => {
+        const statusDiv = document.getElementById('retrainStatus');
+
+        try {
+          // Show loading state
+          retrainBtn.disabled = true;
+          retrainBtn.innerText = 'Retraining...';
+          statusDiv.innerText = 'Retraining model, please wait...';
+          statusDiv.className = 'status-info';
+          statusDiv.classList.remove('hidden');
+
+          // Call model retraining endpoint
+          const response = await fetch('/api/retrain', {
+            method: 'POST',
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            statusDiv.innerText = 'Model successfully retrained! Refreshing page...';
+            statusDiv.className = 'status-success';
+
+            // Reload page after a short delay to show updated metrics
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          } else {
+            statusDiv.innerText = `Error: ${result.error || 'Unknown error'}`;
+            statusDiv.className = 'status-error';
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          statusDiv.innerText = 'An error occurred during retraining.';
+          statusDiv.className = 'status-error';
+        } finally {
+          // Reset button state after a delay or on error
+          setTimeout(() => {
+            retrainBtn.disabled = false;
+            retrainBtn.innerText = 'Retrain Model Now';
+          }, 2000);
+        }
+      });
+    }
+  });
+</script>
+</body>
+</html>

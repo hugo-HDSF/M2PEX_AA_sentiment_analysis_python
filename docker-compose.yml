@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: sentiment-analysis-app
+    restart: always
+    ports:
+      - "5001:5001"
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_DB=sentiment_analysis
+      - FLASK_SECRET_KEY=secret_key
+      - FLASK_DEBUG=1
+    volumes:
+      - ./app:/app/app
+      - ./config.py:/app/config.py
+      - ./wait-for-db.sh:/wait-for-db.sh
+      - ./run.py:/app/run.py
+    depends_on:
+      - db
+    command: [ "/bin/bash", "-c", "chmod +x /wait-for-db.sh && /wait-for-db.sh db 'python run.py'" ]
+    networks:
+      - sentiment-analysis-network
+
+  db:
+    image: mysql:8.0
+    container_name: sentiment-analysis-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=sentiment_analysis
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+    volumes:
+      - ./.docker/mysql/mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 20s
+      retries: 10
+      start_period: 10s
+    networks:
+      - sentiment-analysis-network
+
+  cron:
+    build: .
+    container_name: sentiment-analysis-cron
+    restart: always
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_DB=sentiment_analysis
+      - FLASK_SECRET_KEY=secret_key
+    volumes:
+      - ./app:/app/app
+      - ./config.py:/app/config.py
+      - ./init-cron.sh:/init-cron.sh
+      - ./setup.py:/app/setup.py
+    depends_on:
+      - db
+    command: [ "/bin/bash", "-c", "chmod +x /init-cron.sh && /init-cron.sh" ]
+    networks:
+      - sentiment-analysis-network
+
+networks:
+  sentiment-analysis-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
