@@ -58,6 +58,9 @@ make install
 
 The application will be available at http://localhost:5001
 
+> [!IMPORTANT] 
+> Go to `Dashboard` and click `Retrain Model Now`. `PDF Report` and `Confusion Matrix` will be available at `./app/static/**`.
+
 ## API Usage
 
 ### Sentiment Analysis
